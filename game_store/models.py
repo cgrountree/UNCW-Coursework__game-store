@@ -14,6 +14,8 @@ class Customer(db.Model, UserMixin):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
     balance = db.Column(db.Numeric(4, 2))
+    orders = db.relationship("Order", cascade="all, delete-orphan")
+    returns = db.relationship("Return", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"Customer('{self.username}', '{self.email}', '{self.balance}')"
@@ -24,14 +26,33 @@ class Order(db.Model):
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
     received = db.Column(db.Date, nullable=False)
     shipped = db.Column(db.Date, nullable=False)
+    order_details = db.relationship("Odetails", cascade="all, delete-orphan")
 
     def __repr__(self):
-        return f"Order('{self.title}', '{self.date_posted}')"
+        return f"Order('{self.received}', '{self.shipped}')"
+
+
+class Odetails(db.Model):
+    order_id = db.Column(db.Integer, db.ForeignKey('order.id'), primary_key=True)
+    game_id = db.Column(db.Integer, db.ForeignKey('game.id'), primary_key=True)
+    qty = db.Column(db.Integer)
+
+    def __repr__(self):
+        return f"Odetails('{self.qty}')"
+
+
+class Return(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+
+    def __repr__(self):
+        return f"Return('{self.date}')"
 
 
 class Publisher(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    publisher_name = db.Column(db.String(20))
+    publisher_name = db.Column(db.String(20), nullable=False)
 
     def __repr__(self):
         return f"Publisher('{self.publisher_name}')"
@@ -39,14 +60,35 @@ class Publisher(db.Model):
 
 class Game(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    game_name = db.Column(db.String(50))
-    genre = db.Column(db.String(50))
-    release_date = db.Column(db.Date)
-    price = db.Column(db.Numeric(4, 2))
+    game_name = db.Column(db.String(50), nullable=False)
+    genre = db.Column(db.String(50), nullable=False)
+    release_date = db.Column(db.Date, nullable=False)
+    price = db.Column(db.Numeric(4, 2), nullable=False)
     publisher_id = db.Column(db.Integer, db.ForeignKey('publisher.id'))
+    order_details = db.relationship("Odetails", cascade="all, delete-orphan")
+    runs = db.relationship("Run", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"Game('{self.game_name}', '{self.genre}', '{self.release_date}', '{self.price}', '{self.publisher_id}')"
+
+
+class Platform(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    platform_name = db.Column(db.String(50), nullable=False)
+    release_date = db.Column(db.Date, nullable=False)
+    price = db.Column(db.Numeric(4, 2), nullable=False)
+    runs = db.relationship("Run", cascade="all, delete-orphan")
+
+    def __repr__(self):
+        return f"Game('{self.platform_name}', '{self.release_date}', '{self.price}')"
+
+
+class Run(db.Model):
+    platform_id = db.Column(db.Integer, db.ForeignKey('platform.id'), primary_key=True)
+    game_id = db.Column(db.Integer, db.ForeignKey('game.id'), primary_key=True)
+
+    def __repr__(self):
+        return f"Run('{self.platform_id}', '{self.game_id}')"
 
 
 db.drop_all()
