@@ -19,6 +19,10 @@ def home():
 def about():
     return render_template('about.html', title='About')
 
+@app.route("/game")
+def game():
+    return render_template('game.html', game=request.args.get('selected_game'), title='Game')
+
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
