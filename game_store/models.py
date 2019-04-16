@@ -17,6 +17,12 @@ class Customer(db.Model, UserMixin):
     orders = db.relationship("Order", cascade="all, delete-orphan")
     returns = db.relationship("Return", cascade="all, delete-orphan")
 
+    def __init__(self, username, email, password, balance):
+        self.username = username
+        self.email = email
+        self.password = password
+        self.balance = balance
+
     def __repr__(self):
         return f"Customer('{self.username}', '{self.email}', '{self.balance}')"
 
@@ -28,6 +34,11 @@ class Order(db.Model):
     shipped = db.Column(db.Date, nullable=False)
     order_details = db.relationship("Odetails", cascade="all, delete-orphan")
 
+    def __init__(self, customer_id, received, shipped):
+        self.customer_id = customer_id
+        self.received = received
+        self.shipped = shipped
+
     def __repr__(self):
         return f"Order('{self.received}', '{self.shipped}')"
 
@@ -36,6 +47,11 @@ class Odetails(db.Model):
     order_id = db.Column(db.Integer, db.ForeignKey('order.id'), primary_key=True)
     game_id = db.Column(db.Integer, db.ForeignKey('game.id'), primary_key=True)
     qty = db.Column(db.Integer)
+
+    def __init__(self, order_id, game_id, qty):
+        self.order_id = order_id
+        self.game_id = game_id
+        self.qty = qty
 
     def __repr__(self):
         return f"Odetails('{self.qty}')"
@@ -46,6 +62,10 @@ class Return(db.Model):
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
     date = db.Column(db.Date, nullable=False)
 
+    def __init__(self, customer_id, date):
+        self.customer_id = customer_id
+        self.date = date
+
     def __repr__(self):
         return f"Return('{self.date}')"
 
@@ -53,6 +73,9 @@ class Return(db.Model):
 class Publisher(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     publisher_name = db.Column(db.String(20), nullable=False)
+
+    def __init__(self, publisher_name):
+        self.publisher_name = publisher_name
 
     def __repr__(self):
         return f"Publisher('{self.publisher_name}')"
@@ -68,6 +91,13 @@ class Game(db.Model):
     order_details = db.relationship("Odetails", cascade="all, delete-orphan")
     runs = db.relationship("Run", cascade="all, delete-orphan")
 
+    def __init__(self, game_name, genre, release_date, price, publisher_id):
+        self.game_name = game_name
+        self.genre = genre
+        self.release_date = release_date
+        self.price = price
+        self.publisher_id = publisher_id
+
     def __repr__(self):
         return f"Game('{self.game_name}', '{self.genre}', '{self.release_date}', '{self.price}', '{self.publisher_id}')"
 
@@ -79,6 +109,11 @@ class Platform(db.Model):
     price = db.Column(db.Numeric(4, 2), nullable=False)
     runs = db.relationship("Run", cascade="all, delete-orphan")
 
+    def __init__(self, platform_name, release_date, price):
+        self.platform_name = platform_name
+        self.release_date = release_date
+        self.price = price
+
     def __repr__(self):
         return f"Game('{self.platform_name}', '{self.release_date}', '{self.price}')"
 
@@ -86,6 +121,10 @@ class Platform(db.Model):
 class Run(db.Model):
     platform_id = db.Column(db.Integer, db.ForeignKey('platform.id'), primary_key=True)
     game_id = db.Column(db.Integer, db.ForeignKey('game.id'), primary_key=True)
+
+    def __init__(self, platform_id, game_id):
+        self.platform_id = platform_id
+        self.game_id = game_id
 
     def __repr__(self):
         return f"Run('{self.platform_id}', '{self.game_id}')"
@@ -158,4 +197,88 @@ publishers = [
 ]
 
 db.session.bulk_save_objects(publishers)
+db.session.commit()
+
+platforms = [
+    Platform(platform_name="Playstation 2", release_date=datetime.date(2000, 10, 26), price=30.00),
+    Platform(platform_name="Xbox", release_date=datetime.date(2001, 11, 15), price=30.00),
+    Platform(platform_name="Nintendo Gamecube", release_date=datetime.date(2001, 11, 18), price=60.00),
+    Platform(platform_name="Sega Dreamcast", release_date=datetime.date(1999, 9, 9), price=50.00),
+    Platform(platform_name="Playstation", release_date=datetime.date(1995, 9, 9), price=50.00),
+    Platform(platform_name="Nintendo 64", release_date=datetime.date(1996, 9, 26), price=60.00),
+    Platform(platform_name="Xbox 360", release_date=datetime.date(2005, 11, 22), price=70.00),
+    Platform(platform_name="Playstation 3", release_date=datetime.date(2006, 11, 17), price=80.00),
+    Platform(platform_name="Nintendo Wii", release_date=datetime.date(2006, 11, 19), price=50.00),
+    Platform(platform_name="Nintendo Wii U", release_date=datetime.date(2012, 11, 18), price=40.00),
+    Platform(platform_name="Xbox One", release_date=datetime.date(2013, 11, 22), price=200.00),
+    Platform(platform_name="Playstation 4", release_date=datetime.date(2015, 11, 15), price=250.00),
+    Platform(platform_name="Nintendo Switch", release_date=datetime.date(2017, 3, 3), price=300.00),
+    Platform(platform_name="Nintendo 3DS", release_date=datetime.date(2011, 3, 27), price=70.00)
+]
+
+db.session.bulk_save_objects(platforms)
+db.session.commit()
+
+runs = [
+    Run(platform_id=7, game_id=1),
+    Run(platform_id=8, game_id=1),
+    Run(platform_id=7, game_id=2),
+    Run(platform_id=8, game_id=2),
+    Run(platform_id=11, game_id=2),
+    Run(platform_id=12, game_id=2),
+    Run(platform_id=7, game_id=3),
+    Run(platform_id=8, game_id=3),
+    Run(platform_id=11, game_id=3),
+    Run(platform_id=12, game_id=3),
+    Run(platform_id=10, game_id=3),
+    Run(platform_id=13, game_id=3),
+    Run(platform_id=7, game_id=4),
+    Run(platform_id=8, game_id=4),
+    Run(platform_id=11, game_id=4),
+    Run(platform_id=12, game_id=4),
+    Run(platform_id=7, game_id=5),
+    Run(platform_id=8, game_id=5),
+    Run(platform_id=11, game_id=5),
+    Run(platform_id=12, game_id=5),
+    Run(platform_id=7, game_id=6),
+    Run(platform_id=8, game_id=6),
+    Run(platform_id=11, game_id=7),
+    Run(platform_id=12, game_id=7),
+    Run(platform_id=11, game_id=8),
+    Run(platform_id=12, game_id=8),
+    Run(platform_id=11, game_id=9),
+    Run(platform_id=7, game_id=9),
+    Run(platform_id=7, game_id=10),
+    Run(platform_id=8, game_id=10),
+    Run(platform_id=11, game_id=10),
+    Run(platform_id=12, game_id=10),
+    Run(platform_id=7, game_id=11),
+    Run(platform_id=8, game_id=11),
+    Run(platform_id=9, game_id=11),
+    Run(platform_id=7, game_id=12),
+    Run(platform_id=8, game_id=12),
+    Run(platform_id=11, game_id=12),
+    Run(platform_id=12, game_id=12),
+    Run(platform_id=11, game_id=13),
+    Run(platform_id=12, game_id=13),
+    Run(platform_id=11, game_id=14),
+    Run(platform_id=12, game_id=14),
+    Run(platform_id=13, game_id=14),
+    Run(platform_id=4, game_id=15),
+    Run(platform_id=5, game_id=15),
+    Run(platform_id=6, game_id=15),
+    Run(platform_id=12, game_id=16),
+    Run(platform_id=12, game_id=17),
+    Run(platform_id=8, game_id=18),
+    Run(platform_id=8, game_id=19),
+    Run(platform_id=8, game_id=20),
+    Run(platform_id=13, game_id=21),
+    Run(platform_id=10, game_id=21),
+    Run(platform_id=13, game_id=22),
+    Run(platform_id=13, game_id=23),
+    Run(platform_id=13, game_id=24),
+    Run(platform_id=14, game_id=25),
+]
+
+db.session.bulk_save_objects(runs)
 db.session.commit()
