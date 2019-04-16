@@ -279,6 +279,5 @@ runs = [
     Run(platform_id=13, game_id=24),
     Run(platform_id=14, game_id=25),
 ]
-
 db.session.bulk_save_objects(runs)
 db.session.commit()
