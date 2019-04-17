@@ -1,3 +1,5 @@
+from sqlalchemy import CheckConstraint
+
 from game_store import db, login_manager
 from flask_login import UserMixin
 import datetime
@@ -16,6 +18,9 @@ class Customer(db.Model, UserMixin):
     balance = db.Column(db.Numeric(4, 2))
     orders = db.relationship("Order", cascade="all, delete-orphan")
     returns = db.relationship("Return", cascade="all, delete-orphan")
+    __table_args__ = (
+        CheckConstraint(balance >= 0, name='check_bar_positive'),
+        {})
 
     def __init__(self, username, email, password, balance):
         self.username = username
@@ -30,17 +35,15 @@ class Customer(db.Model, UserMixin):
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
-    received = db.Column(db.Date, nullable=False)
-    shipped = db.Column(db.Date, nullable=False)
+    date = db.Column(db.DateTime, nullable=False)
     order_details = db.relationship("Odetails", cascade="all, delete-orphan")
 
-    def __init__(self, customer_id, received, shipped):
+    def __init__(self, customer_id, date):
         self.customer_id = customer_id
-        self.received = received
-        self.shipped = shipped
+        self.date = date
 
     def __repr__(self):
-        return f"Order('{self.received}', '{self.shipped}')"
+        return f"Order('{self.customer_id}', '{self.date}')"
 
 
 class Odetails(db.Model):

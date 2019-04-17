@@ -1,9 +1,11 @@
 from flask import render_template, url_for, flash, redirect, request
+
 from game_store import app, db, bcrypt
 from game_store.forms import RegistrationForm, LoginForm, BuyForm
 from game_store.models import Customer, Order
 from flask_login import login_user, current_user, logout_user, login_required
 from game_store.models import Game, Publisher
+import datetime
 
 
 
@@ -20,14 +22,29 @@ def about():
     return render_template('about.html', title='About')
 
 
-@app.route("/game", methods=['GET', 'POST'])
-def game():
+@app.route("/game/<selected_game>", methods=['GET', 'POST'])
+@login_required
+def game(selected_game):
     form = BuyForm()
-    if not current_user.is_authenticated:
-        flash('Please login before you can view this page. If you do not have an account, then please register.')
-        return redirect(url_for('login'))
+    if form.validate_on_submit():
+        game_name = selected_game
+        buying_game = Game.query.filter_by(game_name=game_name).first()
+        total_price = form.quantity.data * buying_game.price
+        flash(str(total_price))
 
-    return render_template('game.html', game=request.args.get('selected_game'), form=form, title='Game')
+        if (current_user.balance - total_price) >= 0:
+            current_user.balance -= total_price
+            this_order = Order(customer_id=current_user.id, date=datetime.datetime.now())
+            db.session.add(this_order)
+            db.session.commit()
+            flash('Your order was successful.')
+
+        else:
+            flash('You do not have enough money for this order.')
+            return
+        return redirect(url_for('account'))
+
+    return render_template('game.html', game=selected_game, form=form, title='Game')
 
 
 @app.route("/register", methods=['GET', 'POST'])
