@@ -8,7 +8,6 @@ from game_store.models import Game, Publisher
 import datetime
 
 
-
 @app.route("/")
 @app.route("/home")
 def home():
@@ -31,18 +30,17 @@ def game(selected_game):
         buying_game = Game.query.filter_by(game_name=game_name).first()
         total_price = form.quantity.data * buying_game.price
         flash(str(total_price))
-
-        if (current_user.balance - total_price) >= 0:
-            current_user.balance -= total_price
-            this_order = Order(customer_id=current_user.id, date=datetime.datetime.now())
-            db.session.add(this_order)
+        current_user.balance -= total_price
+        this_order = Order(customer_id=current_user.id, date=datetime.datetime.now())
+        db.session.add(this_order)
+        try:
             db.session.commit()
-            flash('Your order was successful.')
-
-        else:
+            flash('your order was successful')
+            return redirect(url_for('account'))
+        except:
+            db.session.rollback()
             flash('You do not have enough money for this order.')
-            return
-        return redirect(url_for('account'))
+
 
     return render_template('game.html', game=selected_game, form=form, title='Game')
 
