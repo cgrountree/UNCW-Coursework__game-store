@@ -1,6 +1,6 @@
 from flask import render_template, url_for, flash, redirect, request
 from game_store import app, db, bcrypt
-from game_store.forms import RegistrationForm, LoginForm
+from game_store.forms import RegistrationForm, LoginForm, BuyForm
 from game_store.models import Customer, Order
 from flask_login import login_user, current_user, logout_user, login_required
 from game_store.models import Game, Publisher
@@ -19,9 +19,15 @@ def home():
 def about():
     return render_template('about.html', title='About')
 
-@app.route("/game")
+
+@app.route("/game", methods=['GET', 'POST'])
 def game():
-    return render_template('game.html', game=request.args.get('selected_game'), title='Game')
+    form = BuyForm()
+    if not current_user.is_authenticated:
+        flash('Please login before you can view this page. If you do not have an account, then please register.')
+        return redirect(url_for('login'))
+
+    return render_template('game.html', game=request.args.get('selected_game'), form=form, title='Game')
 
 
 @app.route("/register", methods=['GET', 'POST'])
