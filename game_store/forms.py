@@ -36,3 +36,6 @@ class LoginForm(FlaskForm):
 class BuyForm(FlaskForm):
     quantity = IntegerField('Quantity', validators=[DataRequired()])
     submit = SubmitField('Buy')
+
+class ReturnForm(FlaskForm):
+    submit = SubmitField('Return')

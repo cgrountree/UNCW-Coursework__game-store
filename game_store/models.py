@@ -1,5 +1,4 @@
 from sqlalchemy import CheckConstraint
-
 from game_store import db, login_manager
 from flask_login import UserMixin
 import datetime
@@ -16,7 +15,7 @@ class Customer(db.Model, UserMixin):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
     balance = db.Column(db.Numeric(4, 2))
-    orders = db.relationship("Order", cascade="all, delete-orphan")
+    orders = db.relationship("Purchase", cascade="all, delete-orphan")
     returns = db.relationship("Return", cascade="all, delete-orphan")
     __table_args__ = (
         CheckConstraint(balance >= 0, name='check_bar_positive'),
@@ -32,9 +31,9 @@ class Customer(db.Model, UserMixin):
         return f"Customer('{self.username}', '{self.email}', '{self.balance}')"
 
 
-class Order(db.Model):
+class Purchase(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
+    customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'))
     date = db.Column(db.DateTime, nullable=False)
     order_details = db.relationship("Odetails", cascade="all, delete-orphan")
 
@@ -43,11 +42,11 @@ class Order(db.Model):
         self.date = date
 
     def __repr__(self):
-        return f"Order('{self.customer_id}', '{self.date}')"
+        return f"Orders('{self.customer_id}', '{self.date}')"
 
 
 class Odetails(db.Model):
-    order_id = db.Column(db.Integer, db.ForeignKey('order.id'), primary_key=True)
+    purchase_id = db.Column(db.Integer, db.ForeignKey('purchase.id'), primary_key=True)
     game_id = db.Column(db.Integer, db.ForeignKey('game.id'), primary_key=True)
     qty = db.Column(db.Integer)
 
@@ -63,11 +62,13 @@ class Odetails(db.Model):
 class Return(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
-    date = db.Column(db.Date, nullable=False)
+    date = db.Column(db.DateTime, nullable=False)
+    purchase_id = db.Column(db.Integer, db.ForeignKey('purchase.id'), nullable=False)
 
-    def __init__(self, customer_id, date):
+    def __init__(self, customer_id, date, purchase_id):
         self.customer_id = customer_id
         self.date = date
+        self.purchase_id = purchase_id
 
     def __repr__(self):
         return f"Return('{self.date}')"
@@ -132,8 +133,16 @@ class Run(db.Model):
     def __repr__(self):
         return f"Run('{self.platform_id}', '{self.game_id}')"
 
+Game.__table__.drop(db.engine)
+Publisher.__table__.drop(db.engine)
+Platform.__table__.drop(db.engine)
+Run.__table__.drop(db.engine)
 
-db.drop_all()
+Game.__table__.create(db.engine)
+Publisher.__table__.create(db.engine)
+Platform.__table__.create(db.engine)
+Run.__table__.create(db.engine)
+
 db.create_all()
 games = [
     Game(game_name="Assassin's Creed", genre="action-adventure", release_date=datetime.date(2007, 11, 13), price=10.00,
@@ -284,3 +293,4 @@ runs = [
 ]
 db.session.bulk_save_objects(runs)
 db.session.commit()
+

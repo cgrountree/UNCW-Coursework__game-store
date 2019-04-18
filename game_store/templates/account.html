@@ -1,5 +1,18 @@
 {% extends "layout.html" %}
 {% block content %}
-    <h1>{{ current_user.username }}</h1>
-    <h2>{{ current_user.balance }}</h2>
+<h1>{{ current_user.username }}</h1>
+<h2>{{ current_user.balance }}</h2>
+<h2>Orders</h2>
+    {% for order in orders %}
+        <article class="media content-section">
+          <div class="media-body">
+                <div class="article-metadata">
+                    <small class="text-muted"><strong>Order ID:</strong>      {{ order.id }}     |</small>
+                    <small class="text-muted"><strong>Date Ordered</strong>      {{ order.date }}     |</small>
+                    <small class="text-muted"><strong>Quantity</strong>      {{ order.order_details.qty }}    |</small>
+                    <a class="mr-2" href="{{ url_for('returns', selected_purchase=order.id) }}">Return</a>
+                </div>
+          </div>
+        </article>
+    {% endfor %}
 {% endblock content %}
