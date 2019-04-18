@@ -1,7 +1,7 @@
 from flask import render_template, url_for, flash, redirect, request
 from game_store import app, db, bcrypt
 from game_store.forms import RegistrationForm, LoginForm, BuyForm, ReturnForm
-from game_store.models import Customer, Purchase, Odetails, Return
+from game_store.models import Customer, Purchase, Return
 from flask_login import login_user, current_user, logout_user, login_required
 from game_store.models import Game, Publisher
 import datetime
@@ -30,17 +30,18 @@ def game(selected_game):
         total_price = form.quantity.data * buying_game.price
         flash(str(total_price))
         current_user.balance -= total_price
-        this_purchase = Purchase(customer_id=current_user.id, date=datetime.datetime.now())
+        this_purchase = Purchase(customer_id=current_user.id, date=datetime.datetime.now(), game_id=buying_game.id, qty=form.quantity.data)
         db.session.add(this_purchase)
-        #this_order_details = Odetails(purchase_id=this_purchase.id, game_id=buying_game.id, qty=form.quantity.data)
-        #db.session.add(this_order_details)
-        try:
-            db.session.commit()
-            flash('your purchase was successful')
-            return redirect(url_for('account'))
-        except:
-            db.session.rollback()
-            flash('You do not have enough money for this purchase.')
+        db.session.commit()
+        flash('your purchase was successful')
+        return redirect(url_for('account'))
+        # try:
+        #     db.session.commit()
+        #     flash('your purchase was successful')
+        #     return redirect(url_for('account'))
+        # except:
+        #     db.session.rollback()
+        #     flash('You do not have enough money for this purchase.')
 
     return render_template('game.html', game=selected_game, form=form, title='Game')
 
@@ -85,10 +86,10 @@ def logout():
 @app.route("/account")
 @login_required
 def account():
-    the_purchases = db.session.query(Purchase, Odetails).filter(Purchase.id == Odetails.purchase_id)
     orders = Purchase.query.all()
-    return render_template('account.html', orders=orders
-                           )
+    games = Game.query.all()
+    returns = Return.query.all()
+    return render_template('account.html', orders=orders, games=games, returns=returns)
 
 @app.route("/returns/<selected_purchase>", methods=['GET', 'POST'])
 def returns(selected_purchase):

@@ -35,28 +35,17 @@ class Purchase(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'))
     date = db.Column(db.DateTime, nullable=False)
-    order_details = db.relationship("Odetails", cascade="all, delete-orphan")
-
-    def __init__(self, customer_id, date):
-        self.customer_id = customer_id
-        self.date = date
-
-    def __repr__(self):
-        return f"Orders('{self.customer_id}', '{self.date}')"
-
-
-class Odetails(db.Model):
-    purchase_id = db.Column(db.Integer, db.ForeignKey('purchase.id'), primary_key=True)
-    game_id = db.Column(db.Integer, db.ForeignKey('game.id'), primary_key=True)
+    game_id = db.Column(db.Integer, db.ForeignKey('game.id'))
     qty = db.Column(db.Integer)
 
-    def __init__(self, purchase_id, game_id, qty):
-        self.purchase_id = purchase_id
+    def __init__(self, customer_id, date, game_id, qty):
+        self.customer_id = customer_id
+        self.date = date
         self.game_id = game_id
         self.qty = qty
 
     def __repr__(self):
-        return f"Odetails('{self.qty}')"
+        return f"Purchase('{self.customer_id}', '{self.date}', '{self.game_id}', '{self.qty}')"
 
 
 class Return(db.Model):
@@ -92,7 +81,6 @@ class Game(db.Model):
     release_date = db.Column(db.Date, nullable=False)
     price = db.Column(db.Numeric(4, 2), nullable=False)
     publisher_id = db.Column(db.Integer, db.ForeignKey('publisher.id'))
-    order_details = db.relationship("Odetails", cascade="all, delete-orphan")
     runs = db.relationship("Run", cascade="all, delete-orphan")
 
     def __init__(self, game_name, genre, release_date, price, publisher_id):
