@@ -50,8 +50,8 @@ class Odetails(db.Model):
     game_id = db.Column(db.Integer, db.ForeignKey('game.id'), primary_key=True)
     qty = db.Column(db.Integer)
 
-    def __init__(self, order_id, game_id, qty):
-        self.order_id = order_id
+    def __init__(self, purchase_id, game_id, qty):
+        self.purchase_id = purchase_id
         self.game_id = game_id
         self.qty = qty
 

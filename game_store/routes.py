@@ -32,6 +32,8 @@ def game(selected_game):
         current_user.balance -= total_price
         this_purchase = Purchase(customer_id=current_user.id, date=datetime.datetime.now())
         db.session.add(this_purchase)
+        #this_order_details = Odetails(purchase_id=this_purchase.id, game_id=buying_game.id, qty=form.quantity.data)
+        #db.session.add(this_order_details)
         try:
             db.session.commit()
             flash('your purchase was successful')
