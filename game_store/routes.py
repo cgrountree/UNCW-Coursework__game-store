@@ -96,12 +96,14 @@ def account():
     form = AddMoneyForm()
     if form.validate_on_submit():
         current_user.balance += 20
+        db.session.commit()
         return redirect(url_for('account'))
 
     orders = Purchase.query.all()
     games = Game.query.all()
     returns = Return.query.all()
     return render_template('account.html', orders=orders, games=games, returns=returns, form=form)
+
 
 @app.route("/returns/<selected_purchase>", methods=['GET', 'POST'])
 def returns(selected_purchase):
