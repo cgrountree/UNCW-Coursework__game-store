@@ -44,11 +44,11 @@ def game(selected_game):
         # return redirect(url_for('account'))
         try:
             db.session.commit()
-            flash('your purchase was successful')
+            flash('your purchase was successful', 'success')
             return redirect(url_for('account'))
         except:
             db.session.rollback()
-            flash('You do not have enough money for this purchase.')
+            flash('You do not have enough money for this purchase.', 'failure')
 
     return render_template('game.html', game=selected_game, form=form, title='Game')
 
@@ -108,10 +108,14 @@ def account():
 @app.route("/returns/<selected_purchase>", methods=['GET', 'POST'])
 def returns(selected_purchase):
     form = ReturnForm()
-
+    purchase = Purchase.query.filter_by(id=selected_purchase).first()
+    purchased_game_id = purchase.game_id
+    purchased_game = Game.query.filter_by(id=purchased_game_id).first()
+    total_spent = purchased_game.price * purchase.qty
     if form.validate_on_submit():
         thereturn = Return(current_user.id, datetime.datetime.now(), selected_purchase)
         db.session.add(thereturn)
+        current_user.balance += total_spent
         db.session.commit()
         return redirect(url_for('account'))
 
