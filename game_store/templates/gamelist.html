@@ -1,14 +1,10 @@
 {% extends "layout.html" %}
 {% block content %}
-<h2>Game Store Menu</h2>
-<h3><a href="/gamelist">Show List of Games</a></h3>
-    <h3><a href="/genres">Genres</a></h3>
-    <h3><a href="/platforms">Platforms</a></h3>
-    <h3><a href="/publisher">Publishers</a></h3>
-<!--
+<h2>Game Inventory</h2>
     {% for game in games %}
         <article class="media content-section">
           <div class="media-body">
+
                 <div class="article-metadata">
                     <a class="mr-2" href="{{ url_for('game', selected_game=game.game_name) }}">{{ game.game_name }}</a>
                     <small class="text-muted"><strong>genre:</strong>      {{ game.genre }}     |</small>
@@ -23,5 +19,4 @@
           </div>
         </article>
     {% endfor %}
-    -->
 {% endblock content %}

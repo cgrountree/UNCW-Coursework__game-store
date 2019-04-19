@@ -39,3 +39,6 @@ class BuyForm(FlaskForm):
 
 class ReturnForm(FlaskForm):
     submit = SubmitField('Return')
+
+class AddMoneyForm(FlaskForm):
+    submit = SubmitField('Add $20')
