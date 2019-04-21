@@ -35,7 +35,6 @@ def game(selected_game):
         game_name = selected_game
         buying_game = Game.query.filter_by(game_name=game_name).first()
         total_price = form.quantity.data * buying_game.price
-        flash(str(total_price))
         current_user.balance -= total_price
         this_purchase = Purchase(customer_id=current_user.id, date=datetime.datetime.now(), game_id=buying_game.id, qty=form.quantity.data)
         db.session.add(this_purchase)
@@ -44,11 +43,11 @@ def game(selected_game):
         # return redirect(url_for('account'))
         try:
             db.session.commit()
-            flash('your purchase was successful', 'success')
+            flash('Your purchase for ' + str(total_price) + ' was successful', 'success')
             return redirect(url_for('account'))
         except:
             db.session.rollback()
-            flash('You do not have enough money for this purchase.', 'failure')
+            flash('You do not have enough money for this purchase!', 'warning')
 
     return render_template('game.html', game=selected_game, form=form, title='Game')
 
@@ -104,7 +103,6 @@ def account():
     returns = Return.query.all()
     return render_template('account.html', orders=orders, games=games, returns=returns, form=form)
 
-
 @app.route("/returns/<selected_purchase>", methods=['GET', 'POST'])
 def returns(selected_purchase):
     form = ReturnForm()
@@ -112,6 +110,7 @@ def returns(selected_purchase):
     purchased_game_id = purchase.game_id
     purchased_game = Game.query.filter_by(id=purchased_game_id).first()
     total_spent = purchased_game.price * purchase.qty
+
     if form.validate_on_submit():
         thereturn = Return(current_user.id, datetime.datetime.now(), selected_purchase)
         db.session.add(thereturn)
@@ -242,7 +241,7 @@ def ps4():
 
 @app.route('/switch')
 def switch():
-    runs = Run.query.filter_by(platform_id = 13).all()
+    runs = Run.query.filter_by(platform_id=13).all()
     #platforms = Platform.query.filter_by(12).all()
     publishers = Publisher.query.all()
     games = Game.query.filter(Game.runs.any(platform_id=13))
